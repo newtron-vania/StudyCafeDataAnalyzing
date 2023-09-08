@@ -1,0 +1,47 @@
+locate = my_driver.find_element_by_id('selSearchZoneCode')
+locate_list = locate.text.split()
+locate.send_keys(locate_list[24])
+print(len(locate_list))
+
+school = my_driver.find_element_by_id('selSearchKindCode')
+school_list = school.text.split()
+school_list.pop(0)
+school.send_keys(school_list[0])
+school_type = my_driver.find_element_by_id('selSearchTypeCode')
+school_type.send_keys('독서실')
+search_button = my_driver.find_element_by_id('btn_search')
+search_button.click()
+
+#독서실 주소 가져오기
+def get_school_address(school_address_list):
+    a_address = my_driver.find_elements_by_css_selector('nobr a')
+    school_name_list = [name for name in a_address if re.compile("\D").search(name.text)]
+    for i in school_name_list:
+        i.click()
+        time.sleep(0.05)
+        alert = my_driver.switch_to.alert
+        m = reg_ex.search(alert.text)
+        school_address_list.append(m.group())
+        alert.accept()
+
+#도로명 주소 혹은 구 주소 가져오기
+reg_ex = re.compile("([가-힣A-Za-z]+\s[가-힣A-Za-z]+\s[가-힣A-Za-z·\d~\-\.]+(로|길).[\d]+)|([가-힣A-Za-z]+\s[가-힣A-Za-z]+\s[가-힣]+(\d{1,5}|)+(읍|면|동|가|리).[\d]+)")
+school_address_list = []
+while True:
+    number_btn = my_driver.find_elements_by_css_selector('li.w2pageList_li_label')
+    print("페이지 수 : ",len(number_btn))
+    if len(number_btn)==1:
+        get_school_address(school_address_list)
+        break;
+    for i in range(len(number_btn)):
+        number_btn = my_driver.find_elements_by_css_selector('li.w2pageList_li_label')
+        print(i)
+        number_btn[i].click()
+        time.sleep(0.5)
+        get_school_address(school_address_list)
+    next_btn = my_driver.find_element_by_id('paglPg_next_btn')
+    if next_btn.is_displayed():
+        next_btn.click()
+        time.sleep(1)
+    else : 
+        break;
